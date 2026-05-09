@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ubuntu Autoinstall YAML Generator</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@300;400;500;700&family=Ubuntu+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <!-- ========== TOP BAR ========== -->
+    <header id="top-bar">
+        <div class="top-bar-left">
+            <button id="sidebar-toggle" class="icon-btn" title="Toggle Sidebar">
+                <i class="fas fa-bars"></i>
+            </button>
+            <div class="logo">
+                <i class="fab fa-ubuntu"></i>
+                <h1 data-i18n="app.title">Autoinstall <span>YAML Generator</span></h1>
+            </div>
+        </div>
+        <div class="top-bar-center">
+            <div class="profile-selector">
+                <label for="profile-select" data-i18n="profile.label">Profile:</label>
+                <select id="profile-select">
+                    <option value="custom" data-i18n="profile.custom">Custom</option>
+                    <option value="server" data-i18n="profile.server">Server</option>
+                    <option value="desktop" data-i18n="profile.desktop">Desktop</option>
+                    <option value="minimal" data-i18n="profile.minimal">Minimal</option>
+                    <option value="kiosk" data-i18n="profile.kiosk">Kiosk</option>
+                </select>
+            </div>
+            <select id="language-select" class="language-select">
+                <option value="en">EN</option>
+                <option value="pt">PT</option>
+            </select>
+        </div>
+        <div class="top-bar-right">
+            <button id="btn-import" class="action-btn" data-i18n-title="btn.import" title="Load YAML">
+                <i class="fas fa-file-import"></i>
+                <span data-i18n="btn.import">Import</span>
+            </button>
+            <button id="btn-export" class="action-btn primary" data-i18n-title="btn.export" title="Download YAML">
+                <i class="fas fa-download"></i>
+                <span data-i18n="btn.export">Download YAML</span>
+            </button>
+            <button id="btn-reset" class="action-btn danger" data-i18n-title="btn.reset" title="Reset Configuration">
+                <i class="fas fa-undo-alt"></i>
+                <span data-i18n="btn.reset">Reset</span>
+            </button>
+            <input type="file" id="file-input" accept=".yaml,.yml,.txt" hidden>
+        </div>
+    </header>
+
+    <!-- ========== MAIN LAYOUT ========== -->
+    <div id="app-layout">
+        <!-- ===== SIDEBAR ===== -->
+        <nav id="sidebar" aria-label="Categorias de Configuração">
+            <ul id="nav-categories">
+                <li class="nav-item active" data-section="identity">
+                    <i class="fas fa-user-circle"></i>
+                    <span data-i18n="nav.identity">Identity</span>
+                    <span class="badge" id="badge-identity" hidden></span>
+                </li>
+                <li class="nav-item" data-section="locale">
+                    <i class="fas fa-globe-americas"></i>
+                    <span data-i18n="nav.locale">Localization</span>
+                    <span class="badge" id="badge-locale" hidden></span>
+                </li>
+                <li class="nav-item" data-section="keyboard">
+                    <i class="fas fa-keyboard"></i>
+                    <span data-i18n="nav.keyboard">Keyboard</span>
+                    <span class="badge" id="badge-keyboard" hidden></span>
+                </li>
+                <li class="nav-item" data-section="network">
+                    <i class="fas fa-network-wired"></i>
+                    <span data-i18n="nav.network">Network</span>
+                    <span class="badge" id="badge-network" hidden></span>
+                </li>
+                <li class="nav-item" data-section="storage">
+                    <i class="fas fa-hdd"></i>
+                    <span data-i18n="nav.storage">Storage</span>
+                    <span class="badge" id="badge-storage" hidden></span>
+                </li>
+                <li class="nav-item" data-section="ssh">
+                    <i class="fas fa-terminal"></i>
+                    <span data-i18n="nav.ssh">SSH</span>
+                    <span class="badge" id="badge-ssh" hidden></span>
+                </li>
+                <li class="nav-item" data-section="users">
+                    <i class="fas fa-users"></i>
+                    <span data-i18n="nav.users">Users</span>
+                    <span class="badge" id="badge-users" hidden></span>
+                </li>
+                <li class="nav-item" data-section="packages">
+                    <i class="fas fa-box-open"></i>
+                    <span data-i18n="nav.packages">Packages</span>
+                    <span class="badge" id="badge-packages" hidden></span>
+                </li>
+                <li class="nav-item" data-section="snaps">
+                    <i class="fas fa-puzzle-piece"></i>
+                    <span data-i18n="nav.snaps">Snaps</span>
+                    <span class="badge" id="badge-snaps" hidden></span>
+                </li>
+                <li class="nav-item" data-section="updates">
+                    <i class="fas fa-sync-alt"></i>
+                    <span data-i18n="nav.updates">Updates</span>
+                    <span class="badge" id="badge-updates" hidden></span>
+                </li>
+                <li class="nav-item" data-section="earlycommands">
+                    <i class="fas fa-fast-backward"></i>
+                    <span data-i18n="nav.earlycommands">Early-Commands</span>
+                    <span class="badge" id="badge-earlycommands" hidden></span>
+                </li>
+                <li class="nav-item" data-section="latecommands">
+                    <i class="fas fa-scroll"></i>
+                    <span data-i18n="nav.latecommands">Late-Commands</span>
+                    <span class="badge" id="badge-latecommands" hidden></span>
+                </li>
+                <li class="nav-item" data-section="advanced">
+                    <i class="fas fa-cogs"></i>
+                    <span data-i18n="nav.advanced">Advanced</span>
+                    <span class="badge" id="badge-advanced" hidden></span>
+                </li>
+            </ul>
+            <div class="sidebar-footer">
+                <a href="https://canonical-subiquity.readthedocs-hosted.com/en/latest/reference/autoinstall-reference.html" target="_blank" rel="noopener" class="docs-link">
+                    <i class="fas fa-book"></i> <span data-i18n="nav.docs">Official Documentation</span>
+                </a>
+            </div>
+        </nav>
+
+        <!-- ===== MAIN CONTENT ===== -->
+        <main id="main-content">
+            <!-- IDENTITY SECTION -->
+            <section id="section-identity" class="config-section active">
+                <div class="section-header">
+                    <h2><i class="fas fa-user-circle"></i> <span data-i18n="section.identity.title">Identity</span></h2>
+                    <p class="section-desc" data-i18n="section.identity.desc">Main user, hostname and password configuration. Autoinstall identity block.</p>
+                </div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="identity-hostname"><span data-i18n="identity.hostname">Hostname</span> <span class="required">*</span></label>
+                        <input type="text" id="identity-hostname" placeholder="" data-i18n-placeholder="identity.hostname.placeholder" data-yaml="identity.hostname" pattern="[a-zA-Z0-9\-]+" title="Only letters, numbers and hyphens">
+                        <small class="hint" data-i18n="identity.hostname.hint">Machine name on network (no spaces or special characters)</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="identity-realname"><span data-i18n="identity.realname">Full Name</span> <span class="required">*</span></label>
+                        <input type="text" id="identity-realname" placeholder="" data-i18n-placeholder="identity.realname.placeholder" data-yaml="identity.realname">
+                        <small class="hint" data-i18n="identity.realname.hint">User real name (display name)</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="identity-username"><span data-i18n="identity.username">Username</span> <span class="required">*</span></label>
+                        <input type="text" id="identity-username" placeholder="" data-i18n-placeholder="identity.username.placeholder" data-yaml="identity.username" pattern="[a-z_][a-z0-9_\-]*" title="Must start with lowercase letter">
+                        <small class="hint" data-i18n="identity.username.hint">Login user (lowercase letters, no spaces)</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="identity-password"><span data-i18n="identity.password">Password</span> <span class="required">*</span></label>
+                        <div class="input-with-action">
+                            <input type="password" id="identity-password" placeholder="" data-i18n-placeholder="identity.password.placeholder" data-yaml="identity.password">
+                            <button type="button" class="inline-btn" id="toggle-password" data-i18n-title="identity.password_show" title="Show/hide password">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                        <small class="hint" data-i18n="identity.password.hint">Will be converted to SHA-512 hash in generated YAML</small>
+                    </div>
+                </div>
+            </section>
+
+            <!-- LOCALE SECTION -->
+            <section id="section-locale" class="config-section">
+                <div class="section-header">
+                    <h2><i class="fas fa-globe-americas"></i> <span data-i18n="section.locale.title">Localization</span></h2>
+                    <p class="section-desc" data-i18n="section.locale.desc">Language and timezone settings.</p>
+                </div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="locale-lang" data-i18n="locale.lang">Locale / Language</label>
+                        <select id="locale-lang" data-yaml="locale">
+                            <option value="en_US.UTF-8">English (US) – en_US.UTF-8</option>
+                            <option value="pt_BR.UTF-8" selected>Português (Brasil) – pt_BR.UTF-8</option>
+                            <option value="pt_PT.UTF-8">Português (Portugal) – pt_PT.UTF-8</option>
+                            <option value="es_ES.UTF-8">Español – es_ES.UTF-8</option>
+                            <option value="fr_FR.UTF-8">Français – fr_FR.UTF-8</option>
+                            <option value="de_DE.UTF-8">Deutsch – de_DE.UTF-8</option>
+                            <option value="it_IT.UTF-8">Italiano – it_IT.UTF-8</option>
+                            <option value="ja_JP.UTF-8">日本語 – ja_JP.UTF-8</option>
+                            <option value="zh_CN.UTF-8">中文 (简体) – zh_CN.UTF-8</option>
+                            <option value="ko_KR.UTF-8">한국어 – ko_KR.UTF-8</option>
+                            <option value="ru_RU.UTF-8">Русский – ru_RU.UTF-8</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="locale-timezone" data-i18n="locale.timezone">Timezone</label>
+                        <select id="locale-timezone" data-yaml="timezone">
+                            <option value="America/Sao_Paulo" selected>America/Sao_Paulo (BRT)</option>
+                            <option value="America/Manaus">America/Manaus (AMT)</option>
+                            <option value="America/Bahia">America/Bahia (BRT)</option>
+                            <option value="America/Fortaleza">America/Fortaleza (BRT)</option>
+                            <option value="America/Recife">America/Recife (BRT)</option>
+                            <option value="America/Belem">America/Belem (BRT)</option>
+                            <option value="America/Cuiaba">America/Cuiaba (AMT)</option>
+                            <option value="America/Porto_Velho">America/Porto_Velho (AMT)</option>
+                            <option value="America/Rio_Branco">America/Rio_Branco (ACT)</option>
+                            <option value="America/New_York">America/New_York (EST)</option>
+                            <option value="America/Chicago">America/Chicago (CST)</option>
+                            <option value="America/Los_Angeles">America/Los_Angeles (PST)</option>
+                            <option value="Europe/London">Europe/London (GMT)</option>
+                            <option value="Europe/Berlin">Europe/Berlin (CET)</option>
+                            <option value="Europe/Lisbon">Europe/Lisbon (WET)</option>
+                            <option value="Asia/Tokyo">Asia/Tokyo (JST)</option>
+                            <option value="Asia/Shanghai">Asia/Shanghai (CST)</option>
+                            <option value="UTC">UTC</option>
+                        </select>
+                    </div>
+                </div>
+            </section>
+
+            <!-- KEYBOARD SECTION -->
+            <section id="section-keyboard" class="config-section">
+                <div class="section-header">
+                    <h2><i class="fas fa-keyboard"></i> <span data-i18n="section.keyboard.title">Keyboard</span></h2>
+                    <p class="section-desc" data-i18n="section.keyboard.desc">Keyboard layout and variant.</p>
+                </div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="keyboard-layout" data-i18n="keyboard.layout">Layout</label>
+                        <select id="keyboard-layout" data-yaml="keyboard.layout">
+                            <option value="br" selected>Português (Brasil) – br</option>
+                            <option value="us">English (US) – us</option>
+                            <option value="pt">Português (Portugal) – pt</option>
+                            <option value="es">Español – es</option>
+                            <option value="fr">Français – fr</option>
+                            <option value="de">Deutsch – de</option>
+                            <option value="it">Italiano – it</option>
+                            <option value="gb">English (UK) – gb</option>
+                            <option value="jp">日本語 – jp</option>
+                            <option value="latam">Latinoamericano – latam</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="keyboard-variant" data-i18n="keyboard.variant">Variant</label>
+                        <input type="text" id="keyboard-variant" placeholder="" data-i18n-placeholder="keyboard.variant.placeholder" data-yaml="keyboard.variant">
+                        <small class="hint" data-i18n="keyboard.variant.hint">Ex: "intl", "nodeadkeys", "dvorak" (leave empty for default)</small>
+                    </div>
+                </div>
+            </section>
+
+            <!-- NETWORK SECTION -->
+            <section id="section-network" class="config-section">
+                <div class="section-header">
+                    <h2><i class="fas fa-network-wired"></i> <span data-i18n="section.network.title">Network</span></h2>
+                    <p class="section-desc" data-i18n="section.network.desc">Network configuration via Netplan.</p>
+                </div>
+                <div class="form-grid full-width">
+                    <div class="form-group">
+                        <label data-i18n="network.method">Configuration Method</label>
+                        <div class="toggle-group">
+                            <button type="button" class="toggle-btn active" data-value="dhcp" data-target="network-method" data-i18n="network.dhcp">DHCP</button>
+                            <button type="button" class="toggle-btn" data-value="static" data-target="network-method" data-i18n="network.static">Static IP</button>
+                            <button type="button" class="toggle-btn" data-value="disabled" data-target="network-method" data-i18n="network.disabled">Disabled</button>
+                        </div>
+                        <input type="hidden" id="network-method" value="dhcp">
+                    </div>
+                </div>
+                <div id="network-static-fields" class="form-grid" style="display:none;">
+                    <div class="form-group">
+                        <label for="network-interface" data-i18n="network.interface">Interface</label>
+                        <input type="text" id="network-interface" placeholder="ens3" value="ens3" data-i18n-placeholder="network.interface.placeholder">
+                        <small class="hint" data-i18n="network.interface.hint">Network interface name (ex: eth0, ens3, enp0s3)</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="network-address" data-i18n="network.address">IP Address (CIDR)</label>
+                        <input type="text" id="network-address" placeholder="192.168.1.100/24" data-i18n-placeholder="network.address.placeholder">
+                        <small class="hint" data-i18n="network.address.hint">Address with mask (ex: 192.168.1.100/24)</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="network-gateway" data-i18n="network.gateway">Gateway</label>
+                        <input type="text" id="network-gateway" placeholder="192.168.1.1" data-i18n-placeholder="network.gateway.placeholder">
+                    </div>
+                    <div class="form-group">
+                        <label for="network-dns" data-i18n="network.dns">DNS Servers</label>
+                        <input type="text" id="network-dns" placeholder="8.8.8.8, 8.8.4.4" data-i18n-placeholder="network.dns.placeholder">
+                        <small class="hint" data-i18n="network.dns.hint">Separate multiple with comma</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="network-search" data-i18n="network.search">Search Domains</label>
+                        <input type="text" id="network-search" placeholder="example.com" data-i18n-placeholder="network.search.placeholder">
+                        <small class="hint" data-i18n="network.search.hint">Comma-separated search domains</small>
+                    </div>
+                </div>
+                <div class="form-grid full-width" style="margin-top:1rem;">
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="network-wifi-enable">
+                            <span data-i18n="network.wifi">Enable Wi-Fi</span>
+                        </label>
+                    </div>
+                </div>
+                <div id="network-wifi-fields" class="form-grid" style="display:none;">
+                    <div class="form-group">
+                        <label for="network-wifi-ssid" data-i18n="network.wifi.ssid">SSID</label>
+                        <input type="text" id="network-wifi-ssid" placeholder="MyNetwork" data-i18n-placeholder="network.wifi.placeholder">
+                    </div>
+                    <div class="form-group">
+                        <label for="network-wifi-password" data-i18n="network.wifi.password">Wi-Fi Password</label>
+                        <input type="password" id="network-wifi-password" placeholder="••••••••" data-i18n-placeholder="network.wifi.pass_placeholder">
+                    </div>
+                </div>
+            </section>
+
+            <!-- STORAGE SECTION -->
+            <section id="section-storage" class="config-section">
+                <div class="section-header">
+                    <h2><i class="fas fa-hdd"></i> <span data-i18n="section.storage.title">Storage</span></h2>
+                    <p class="section-desc" data-i18n="section.storage.desc">Disk and partitioning configuration.</p>
+                </div>
+                <div class="form-grid full-width">
+                    <div class="form-group">
+                        <label data-i18n="storage.layout_mode">Layout Mode</label>
+                        <div class="toggle-group">
+                            <button type="button" class="toggle-btn active" data-value="lvm" data-target="storage-layout" data-i18n="storage.lvm">LVM (Recommended)</button>
+                            <button type="button" class="toggle-btn" data-value="direct" data-target="storage-layout" data-i18n="storage.direct">Direct</button>
+                            <button type="button" class="toggle-btn" data-value="zfs" data-target="storage-layout" data-i18n="storage.zfs">ZFS</button>
+                            <button type="button" class="toggle-btn" data-value="custom" data-target="storage-layout" data-i18n="storage.custom">Custom</button>
+                        </div>
+                        <input type="hidden" id="storage-layout" value="lvm">
+                    </div>
+                </div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="storage-disk" data-i18n="storage.disk">Target Disk</label>
+                        <input type="text" id="storage-disk" placeholder="/dev/sda" value="/dev/sda" data-i18n-placeholder="storage.disk.placeholder">
+                        <small class="hint" data-i18n="storage.disk.hint">Block device (ex: /dev/sda, /dev/vda, /dev/nvme0n1)</small>
+                    </div>
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="storage-encrypt">
+                            <span data-i18n="storage.encrypt">LUKS Encryption</span>
+                        </label>
+                    </div>
+                </div>
+                <div id="storage-encrypt-fields" class="form-grid" style="display:none;">
+                    <div class="form-group">
+                        <label for="storage-encrypt-password" data-i18n="storage.encrypt.password">Encryption Password</label>
+                        <input type="password" id="storage-encrypt-password" placeholder="LUKS Password" data-i18n-placeholder="storage.encrypt.pass_placeholder">
+                    </div>
+                </div>
+                <div id="storage-custom-fields" style="display:none; margin-top: 1.5rem;">
+                    <h3 class="subsection-title" data-i18n="storage.partitions">Custom Partitions</h3>
+                    <div id="partitions-list"></div>
+                    <button type="button" id="btn-add-partition" class="action-btn small">
+                        <i class="fas fa-plus"></i> <span data-i18n="storage.add_partition">Add Partition</span>
+                    </button>
+                </div>
+            </section>
+
+            <!-- SSH SECTION -->
+            <section id="section-ssh" class="config-section">
+                <div class="section-header">
+                    <h2><i class="fas fa-terminal"></i> <span data-i18n="section.ssh.title">SSH</span></h2>
+                    <p class="section-desc" data-i18n="section.ssh.desc">Remote access via OpenSSH.</p>
+                </div>
+                <div class="form-grid full-width">
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="ssh-install" checked>
+                            <span data-i18n="ssh.install">Install OpenSSH server</span>
+                        </label>
+                    </div>
+                </div>
+                <div id="ssh-fields" class="form-grid">
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="ssh-pwauth">
+                            <span data-i18n="ssh.pwauth">Allow password authentication</span>
+                        </label>
+                    </div>
+                    <div class="form-group full-span">
+                        <label for="ssh-authorized-keys" data-i18n="ssh.authorized_keys">Authorized Public Keys</label>
+                        <textarea id="ssh-authorized-keys" rows="4" placeholder="" data-i18n-placeholder="ssh.authorized_keys.placeholder"></textarea>
+                        <small class="hint" data-i18n="ssh.authorized_keys.hint">One key per line. Supported formats: ssh-rsa, ssh-ed25519, ecdsa-sha2-*</small>
+                    </div>
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="ssh-allow-import">
+                            <span data-i18n="ssh.import_keys">Import from GitHub/Launchpad</span>
+                        </label>
+                    </div>
+                </div>
+                <div id="ssh-import-fields" class="form-grid" style="display:none;">
+                    <div class="form-group">
+                        <label for="ssh-import-source" data-i18n="ssh.import.source">Source</label>
+                        <select id="ssh-import-source">
+                            <option value="gh" data-i18n="ssh.import.source_gh">GitHub</option>
+                            <option value="lp" data-i18n="ssh.import.source_lp">Launchpad</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="ssh-import-id" data-i18n="ssh.import.id">User ID</label>
+                        <input type="text" id="ssh-import-id" placeholder="" data-i18n-placeholder="ssh.import.id_placeholder">
+                    </div>
+                    <div class="form-group full-span">
+                        <button type="button" id="btn-fetch-ssh-keys" class="action-btn small">
+                            <i class="fas fa-download"></i> <span data-i18n="ssh.import.fetch">Fetch Keys</span>
+                        </button>
+                        <small class="hint" data-i18n="ssh.import.hint">Fetches public keys from the specified account</small>
+                    </div>
+                </div>
+            </section>
+
+            <!-- USERS SECTION -->
+            <section id="section-users" class="config-section">
+                <div class="section-header">
+                    <h2><i class="fas fa-users"></i> <span data-i18n="section.users.title">Additional Users</span></h2>
+                    <p class="section-desc" data-i18n="section.users.desc">Extra users via cloud-init. Main user is in Identity.</p>
+                </div>
+                <div id="users-list"></div>
+                <button type="button" id="btn-add-user" class="action-btn small">
+                    <i class="fas fa-user-plus"></i> <span data-i18n="users.add">Add User</span>
+                </button>
+            </section>
+
+            <!-- PACKAGES SECTION -->
+            <section id="section-packages" class="config-section">
+                <div class="section-header">
+                    <h2><i class="fas fa-box-open"></i> <span data-i18n="section.packages.title">Packages</span></h2>
+                    <p class="section-desc" data-i18n="section.packages.desc">Packages to install after the initial setup.</p>
+                </div>
+                <div class="form-grid full-width">
+                    <div class="form-group">
+                        <label data-i18n="packages.popular">Popular Packages</label>
+                        <div class="chips-grid" id="popular-packages">
+                            <label class="chip"><input type="checkbox" value="curl"> curl</label>
+                            <label class="chip"><input type="checkbox" value="wget"> wget</label>
+                            <label class="chip"><input type="checkbox" value="vim"> vim</label>
+                            <label class="chip"><input type="checkbox" value="nano"> nano</label>
+                            <label class="chip"><input type="checkbox" value="git"> git</label>
+                            <label class="chip"><input type="checkbox" value="htop"> htop</label>
+                            <label class="chip"><input type="checkbox" value="net-tools"> net-tools</label>
+                            <label class="chip"><input type="checkbox" value="build-essential"> build-essential</label>
+                            <label class="chip"><input type="checkbox" value="unzip"> unzip</label>
+                            <label class="chip"><input type="checkbox" value="ca-certificates"> ca-certificates</label>
+                            <label class="chip"><input type="checkbox" value="software-properties-common"> software-properties-common</label>
+                            <label class="chip"><input type="checkbox" value="apt-transport-https"> apt-transport-https</label>
+                            <label class="chip"><input type="checkbox" value="gnupg"> gnupg</label>
+                            <label class="chip"><input type="checkbox" value="lsb-release"> lsb-release</label>
+                            <label class="chip"><input type="checkbox" value="ufw"> ufw</label>
+                            <label class="chip"><input type="checkbox" value="fail2ban"> fail2ban</label>
+                            <label class="chip"><input type="checkbox" value="nginx"> nginx</label>
+                            <label class="chip"><input type="checkbox" value="apache2"> apache2</label>
+                            <label class="chip"><input type="checkbox" value="docker.io"> docker.io</label>
+                            <label class="chip"><input type="checkbox" value="python3-pip"> python3-pip</label>
+                            <label class="chip"><input type="checkbox" value="nodejs"> nodejs</label>
+                            <label class="chip"><input type="checkbox" value="default-jdk"> default-jdk</label>
+                            <label class="chip"><input type="checkbox" value="postgresql"> postgresql</label>
+                            <label class="chip"><input type="checkbox" value="mysql-server"> mysql-server</label>
+                        </div>
+                    </div>
+                    <div class="form-group full-span">
+                        <label for="packages-extra" data-i18n="packages.extra">Additional Packages</label>
+                        <textarea id="packages-extra" rows="3" placeholder="" data-i18n-placeholder="packages.extra.placeholder"></textarea>
+                        <small class="hint" data-i18n="packages.extra.hint">One package per line. Accepts valid APT package names.</small>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SNAPS SECTION -->
+            <section id="section-snaps" class="config-section">
+                <div class="section-header">
+                    <h2><i class="fas fa-puzzle-piece"></i> <span data-i18n="section.snaps.title">Snaps</span></h2>
+                    <p class="section-desc" data-i18n="section.snaps.desc">Snap packages to install.</p>
+                </div>
+                <div id="snaps-list"></div>
+                <button type="button" id="btn-add-snap" class="action-btn small">
+                    <i class="fas fa-plus"></i> <span data-i18n="snaps.add">Add Snap</span>
+                </button>
+                <div class="suggestion-box" style="margin-top:1.5rem;">
+                    <h4><i class="fas fa-lightbulb"></i> <span data-i18n="snaps.popular">Popular Snaps</span></h4>
+                    <div class="chips-grid" id="popular-snaps">
+                        <button type="button" class="chip-btn" data-snap="lxd" data-channel="latest/stable">lxd</button>
+                        <button type="button" class="chip-btn" data-snap="docker" data-channel="latest/stable">docker</button>
+                        <button type="button" class="chip-btn" data-snap="microk8s" data-channel="latest/stable" data-classic="true">microk8s</button>
+                        <button type="button" class="chip-btn" data-snap="go" data-channel="latest/stable" data-classic="true">go</button>
+                        <button type="button" class="chip-btn" data-snap="node" data-channel="latest/stable" data-classic="true">node</button>
+                        <button type="button" class="chip-btn" data-snap="code" data-channel="latest/stable" data-classic="true">VS Code</button>
+                        <button type="button" class="chip-btn" data-snap="firefox" data-channel="latest/stable">firefox</button>
+                        <button type="button" class="chip-btn" data-snap="chromium" data-channel="latest/stable">chromium</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- UPDATES SECTION -->
+            <section id="section-updates" class="config-section">
+                <div class="section-header">
+                    <h2><i class="fas fa-sync-alt"></i> <span data-i18n="section.updates.title">Updates</span></h2>
+                    <p class="section-desc" data-i18n="section.updates.desc">Update policy during installation.</p>
+                </div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="updates-policy" data-i18n="updates.policy">Update Policy</label>
+                        <select id="updates-policy" data-yaml="updates">
+                            <option value="security" selected data-i18n="updates.security">Security only (security)</option>
+                            <option value="all" data-i18n="updates.all">All updates (all)</option>
+                        </select>
+                        <small class="hint"><code>security</code>: Installs only security updates. <code>all</code>: Installs all.</small>
+                    </div>
+                </div>
+            </section>
+
+            <!-- EARLY-COMMANDS SECTION -->
+            <section id="section-earlycommands" class="config-section">
+                <div class="section-header">
+                    <h2><i class="fas fa-fast-backward"></i> <span data-i18n="section.earlycommands.title">Early-Commands</span></h2>
+                    <p class="section-desc" data-i18n="section.earlycommands.desc">Commands run before installation starts.</p>
+                </div>
+                <div class="form-grid full-width">
+                    <div class="form-group full-span">
+                        <label for="early-commands-editor" data-i18n="earlycommands.editor">Commands</label>
+                        <textarea id="early-commands-editor" rows="6" placeholder="" data-i18n-placeholder="earlycommands.placeholder"></textarea>
+                        <small class="hint" data-i18n="earlycommands.hint">One command per line. These commands run in the Curtin environment before installation.</small>
+                    </div>
+                </div>
+                <div class="suggestion-box" style="margin-top:1rem;">
+                    <h4><i class="fas fa-lightbulb"></i> <span data-i18n="earlycommands.common">Common Commands</span></h4>
+                    <div class="suggestions-list">
+                        <button type="button" class="suggestion-btn" data-cmd="echo 'Validating configuration...'">Echo debug</button>
+                        <button type="button" class="suggestion-btn" data-cmd="ping -c 1 8.8.8.8">Test connectivity</button>
+                        <button type="button" class="suggestion-btn" data-cmd="ls /dev/sd*">List disks</button>
+                        <button type="button" class="suggestion-btn" data-cmd="df -h">Disk space</button>
+                        <button type="button" class="suggestion-btn" data-cmd="free -m">Memory available</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- LATE-COMMANDS SECTION -->
+            <section id="section-latecommands" class="config-section">
+                <div class="section-header">
+                    <h2><i class="fas fa-scroll"></i> <span data-i18n="section.latecommands.title">Late-Commands</span></h2>
+                    <p class="section-desc" data-i18n="section.latecommands.desc">Commands run after installation. Target at /target.</p>
+                </div>
+                <div class="form-grid full-width">
+                    <div class="form-group full-span">
+                        <label for="late-commands-editor" data-i18n="latecommands.editor">Commands</label>
+                        <textarea id="late-commands-editor" rows="8" placeholder="" data-i18n-placeholder="latecommands.placeholder"></textarea>
+                        <small class="hint" data-i18n="latecommands.hint">One command per line. Use <code>curtin in-target --target=/target --</code> to execute on the installed system.</small>
+                    </div>
+                </div>
+                <div class="suggestion-box" style="margin-top:1rem;">
+                    <h4><i class="fas fa-lightbulb"></i> <span data-i18n="latecommands.common">Common Commands</span></h4>
+                    <div class="suggestions-list">
+                        <button type="button" class="suggestion-btn" data-cmd="curtin in-target --target=/target -- apt-get update">apt-get update</button>
+                        <button type="button" class="suggestion-btn" data-cmd="curtin in-target --target=/target -- apt-get upgrade -y">apt-get upgrade</button>
+                        <button type="button" class="suggestion-btn" data-cmd="curtin in-target --target=/target -- systemctl enable ufw">Enable UFW</button>
+                        <button type="button" class="suggestion-btn" data-cmd="curtin in-target --target=/target -- ufw allow OpenSSH">Allow SSH in UFW</button>
+                        <button type="button" class="suggestion-btn" data-cmd="curtin in-target --target=/target -- ufw --force enable">Force enable UFW</button>
+                        <button type="button" class="suggestion-btn" data-cmd="curtin in-target --target=/target -- timedatectl set-ntp on">Enable NTP</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ADVANCED SECTION -->
+            <section id="section-advanced" class="config-section">
+                <div class="section-header">
+                    <h2><i class="fas fa-cogs"></i> <span data-i18n="section.advanced.title">Advanced</span></h2>
+                    <p class="section-desc" data-i18n="section.advanced.desc">Additional settings.</p>
+                </div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="autoinstall-version" data-i18n="advanced.version">Autoinstall Version</label>
+                        <select id="autoinstall-version">
+                            <option value="1" selected>1 (Ubuntu 20.04+)</option>
+                        </select>
+                        <small class="hint" data-i18n="advanced.version.hint">Autoinstall schema version. Currently only v1 is supported.</small>
+                    </div>
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="advanced-drivers">
+                            <span data-i18n="advanced.drivers">Install third-party drivers</span>
+                        </label>
+                        <small class="hint" data-i18n="advanced.drivers_desc">Equivalent to <code>drivers: install: true</code></small>
+                    </div>
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="advanced-codecs">
+                            <span data-i18n="advanced.codecs">Install restricted codecs</span>
+                        </label>
+                        <small class="hint" data-i18n="advanced.codecs_desc">Equivalent to <code>codecs: install: true</code></small>
+                    </div>
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="advanced-oem">
+                            <span data-i18n="advanced.oem">OEM Mode</span>
+                        </label>
+                        <small class="hint" data-i18n="advanced.oem_desc">Equivalent to <code>oem: install: auto</code></small>
+                    </div>
+                    <div class="form-group full-span">
+                        <label for="advanced-proxy" data-i18n="advanced.proxy">HTTP Proxy</label>
+                        <input type="text" id="advanced-proxy" placeholder="" data-i18n-placeholder="advanced.proxy.placeholder">
+                        <small class="hint" data-i18n="advanced.proxy.hint">Proxy for use during installation. Block <code>proxy</code>.</small>
+                    </div>
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="advanced-shutdown" >
+                            <span data-i18n="advanced.shutdown">Shutdown after installation (instead of reboot)</span>
+                        </label>
+                        <small class="hint" data-i18n="advanced.shutdown_desc">Equivalent to <code>shutdown: poweroff</code> (default is reboot)</small>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- ===== RESIZE HANDLE ===== -->
+        <div id="yaml-resize-handle" title="Drag to resize"></div>
+
+        <!-- ===== YAML PREVIEW PANEL ===== -->
+        <aside id="yaml-panel">
+            <div class="panel-header">
+                <div class="panel-title">
+                    <i class="fas fa-code"></i>
+                    <h3 data-i18n="yaml.title">YAML Preview</h3>
+                </div>
+                <div class="panel-actions">
+                    <button id="btn-copy-yaml" class="icon-btn" data-i18n-title="yaml.copy_title" title="Copy to clipboard">
+                        <i class="fas fa-copy"></i>
+                    </button>
+                    <button id="btn-edit-yaml" class="icon-btn" data-i18n-title="yaml.edit_title" title="Edit YAML manually">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button id="btn-fullscreen-yaml" class="icon-btn" data-i18n-title="yaml.fullscreen" title="Fullscreen">
+                        <i class="fas fa-expand"></i>
+                    </button>
+                </div>
+            </div>
+            <div id="yaml-content-wrapper">
+                <pre id="yaml-preview"><code id="yaml-output"></code></pre>
+                <textarea id="yaml-editor" hidden></textarea>
+            </div>
+            <div class="panel-footer">
+                <div id="yaml-status">
+                    <span id="yaml-line-count">0 <span data-i18n="yaml.lines">lines</span></span>
+                    <span id="yaml-validation-status" class="status-ok"><i class="fas fa-check-circle"></i> <span data-i18n="yaml.valid">Valid</span></span>
+                </div>
+            </div>
+        </aside>
+    </div>
+
+    <!-- ========== TOAST NOTIFICATIONS ========== -->
+    <div id="toast-container"></div>
+
+    <!-- ========== MODALS ========== -->
+    <div id="modal-overlay" class="modal-overlay hidden">
+        <div class="modal" id="modal-content">
+            <div class="modal-header">
+                <h3 id="modal-title">Modal</h3>
+                <button class="icon-btn modal-close"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body" id="modal-body"></div>
+            <div class="modal-footer" id="modal-footer"></div>
+        </div>
+    </div>
+
+    <!-- ========== SCRIPTS ========== -->
+    <script src="js/i18n.js"></script>
+    <script src="js/yamlGenerator.js"></script>
+    <script src="js/yamlParser.js"></script>
+    <script src="js/validator.js"></script>
+    <script src="js/profiles.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/app.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            I18n.init();
+            
+            const langSelect = document.getElementById('language-select');
+            if (langSelect) {
+                langSelect.value = I18n.getLocale();
+                langSelect.addEventListener('change', function(e) {
+                    I18n.setLocale(e.target.value);
+                });
+            }
+        });
+    </script>
+</body>
+</html>

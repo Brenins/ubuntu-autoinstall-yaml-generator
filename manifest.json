@@ -1,0 +1,20 @@
+{
+  "name": "Ubuntu Autoinstall YAML Generator",
+  "short_name": "YAML Gen",
+  "icons": [
+    {
+      "src": "assets/linux32x32.png",
+      "sizes": "32x32",
+      "type": "image/png"
+    },
+    {
+      "src": "assets/linux256x256.png",
+      "sizes": "256x256",
+      "type": "image/png"
+    }
+  ],
+  "start_url": "./index.html",
+  "display": "standalone",
+  "theme_color": "#3465a4",
+  "background_color": "#ffffff"
+}
